@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'MyFont';
+  src: url('./FZSuSXSJF.ttf') ;
+  font-weight: 600;
+  font-style: normal;
+}
+.hello {
+  color: red;
+  background: url('./avatar.jpg');
+  font-family: 'MyFont';
+}
