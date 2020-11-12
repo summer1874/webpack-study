@@ -131,40 +131,81 @@
 // webpack 和 webpack 插件似乎“知道”应该生成哪些文件。答案是，webpack 通过 manifest，可以追踪所有模块到输出 bundle 之间的映射。
 // :::
 
+// const path = require('path')
+// // 设置 HtmlWebpackPlugin  简化了HTML文件的创建，以便为你的webpack包提供服务。
+// const HtmlWebpackPlugin = require('html-webpack-plugin')
+// // 清理 /dist 文件夹 
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+// module.exports = {
+//   // 动态加载的模块 多个入口起点
+//   entry: {
+//     app: './src/index.js',
+//     print: './src/print.js',
+//   },
+//   plugins: [
+//     // 在每次构建前清理 /dist 文件夹
+//     new CleanWebpackPlugin(),
+//     // 生成index.html 文件, 替换原有文件
+//     new HtmlWebpackPlugin({
+//       title: '管理输出',
+//     }),
+//   ],
+//   output: {
+//   /** 当通过多个入口起点(entry point)、代码拆分(code splitting)或各种插件(plugin)创建多个 bundle，
+//     * 应该使用以下一种替换方式，来赋予每个 bundle 一个唯一的名称…  
+//     * function (pathData, assetInfo) => string [name] 
+//     * [name] => pathData.Chunk.name  
+//     * [id] =>  pathData.Chunk.id   使用内部 chunk id
+//     * [contenthash] => pathData.Chunk.id 使用由生成的内容产生的 hash
+//     * [name].[contenthash].bundle.js'  结合多个替换组合使用
+//     * 使用函数返回 filename
+//     * filename: (pathData) => {
+//     *  return pathData.chunk.name === 'main' ? '[name].js': '[name]/[name].js'
+//     * }
+//     */
+//     filename: '[name].bundle.js',
+//     path: path.resolve(__dirname, 'dist'),
+//   }
+// }
+
+// 开发环境
+
 const path = require('path')
-// 设置 HtmlWebpackPlugin  简化了HTML文件的创建，以便为你的webpack包提供服务。
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-// 清理 /dist 文件夹 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 module.exports = {
-  // 动态加载的模块 多个入口起点
   entry: {
     app: './src/index.js',
     print: './src/print.js',
   },
+  // 使用 source map
+  devtool: 'inline-source-map',
+  // 使用 webpack-dev-server 
+  // yarn add webpack-dev-server -D
+  // 告知 webpack-dev-server，将 dist 目录下的文件 serve 到 localhost:8080 下。
+  // 配合package.json scripts "start": "webpack serve --open"
+  devServer: {
+    contentBase: './dist'
+  },
   plugins: [
-    // 在每次构建前清理 /dist 文件夹
-    new CleanWebpackPlugin(),
-    // 生成index.html 文件, 替换原有文件
+    // 使用 watch mode(观察模式) 
+    // 配合package.json scripts.watch:webpack --watch
+    // 检测模块变动，webpack 自动地重新编译修改后的模块。
+    // 缺点： 需要刷新浏览器
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new HtmlWebpackPlugin({
       title: '管理输出',
     }),
   ],
   output: {
-  /** 当通过多个入口起点(entry point)、代码拆分(code splitting)或各种插件(plugin)创建多个 bundle，
-    * 应该使用以下一种替换方式，来赋予每个 bundle 一个唯一的名称…  
-    * function (pathData, assetInfo) => string [name] 
-    * [name] => pathData.Chunk.name  
-    * [id] =>  pathData.Chunk.id   使用内部 chunk id
-    * [contenthash] => pathData.Chunk.id 使用由生成的内容产生的 hash
-    * [name].[contenthash].bundle.js'  结合多个替换组合使用
-    * 使用函数返回 filename
-    * filename: (pathData) => {
-    *  return pathData.chunk.name === 'main' ? '[name].js': '[name]/[name].js'
-    * }
-    */
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    // 使用 webpack-dev-middleware 
+    // yarn add express webpack-dev-middleware -D
+    // 配合 server.js
+    // webpack-dev-middleware 是一个封装器(wrapper)，它可以把 webpack 处理过的文件发送到一个 server。 webpack-dev-server 在内部使用了它，然而它也可以作为一个单独的 package 来使用，以便根据需求进行更多自定义设置。
+    // 使用 publicPath，以确保文件资源能够正确地 serve 在 http://localhost:3000 下
+    publicPath: '/'
   }
 }
 
