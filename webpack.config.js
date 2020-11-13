@@ -170,42 +170,69 @@
 
 // 开发环境
 
+// const path = require('path')
+// const HtmlWebpackPlugin = require('html-webpack-plugin')
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+// module.exports = {
+//   entry: {
+//     app: './src/index.js',
+//     print: './src/print.js',
+//   },
+//   // 使用 source map
+//   devtool: 'inline-source-map',
+//   // 使用 webpack-dev-server 
+//   // yarn add webpack-dev-server -D
+//   // 告知 webpack-dev-server，将 dist 目录下的文件 serve 到 localhost:8080 下。
+//   // 配合package.json scripts "start": "webpack serve --open"
+//   devServer: {
+//     contentBase: './dist'
+//   },
+//   plugins: [
+//     // 使用 watch mode(观察模式) 
+//     // 配合package.json scripts.watch:webpack --watch
+//     // 检测模块变动，webpack 自动地重新编译修改后的模块。
+//     // 缺点： 需要刷新浏览器
+//     new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
+//     new HtmlWebpackPlugin({
+//       title: '管理输出',
+//     }),
+//   ],
+//   output: {
+//     filename: '[name].bundle.js',
+//     path: path.resolve(__dirname, 'dist'),
+//     // 使用 webpack-dev-middleware 
+//     // yarn add express webpack-dev-middleware -D
+//     // 配合 server.js
+//     // webpack-dev-middleware 是一个封装器(wrapper)，它可以把 webpack 处理过的文件发送到一个 server。 webpack-dev-server 在内部使用了它，然而它也可以作为一个单独的 package 来使用，以便根据需求进行更多自定义设置。
+//     // 使用 publicPath，以确保文件资源能够正确地 serve 在 http://localhost:3000 下
+//     publicPath: '/'
+//   }
+// }
+
+
+// 代码分离
+
+/* 
+ * 1. 入口起点：使用 entry 配置手动地分离代码。
+ * 2. 防止重复：使用 SplitChunksPlugin 去重和分离 chunk。
+ * 3. 动态导入：通过模块的内联函数调用来分离代码。 
+ */
+
 const path = require('path')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
 module.exports = {
+  mode: 'development',
   entry: {
-    app: './src/index.js',
-    print: './src/print.js',
+    // 隐患 
+    // 1. 如果入口 chunk 之间包含一些重复的模块，那些重复模块都会被引入到各个 bundle 中。
+    // 2. 这种方法不够灵活，并且不能动态地将核心应用程序逻辑中的代码拆分出来
+    // tip: 都引入了 lodash
+    index: './src/index.js',
+    another: './src/another-module.js'
   },
-  // 使用 source map
-  devtool: 'inline-source-map',
-  // 使用 webpack-dev-server 
-  // yarn add webpack-dev-server -D
-  // 告知 webpack-dev-server，将 dist 目录下的文件 serve 到 localhost:8080 下。
-  // 配合package.json scripts "start": "webpack serve --open"
-  devServer: {
-    contentBase: './dist'
-  },
-  plugins: [
-    // 使用 watch mode(观察模式) 
-    // 配合package.json scripts.watch:webpack --watch
-    // 检测模块变动，webpack 自动地重新编译修改后的模块。
-    // 缺点： 需要刷新浏览器
-    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
-    new HtmlWebpackPlugin({
-      title: '管理输出',
-    }),
-  ],
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    // 使用 webpack-dev-middleware 
-    // yarn add express webpack-dev-middleware -D
-    // 配合 server.js
-    // webpack-dev-middleware 是一个封装器(wrapper)，它可以把 webpack 处理过的文件发送到一个 server。 webpack-dev-server 在内部使用了它，然而它也可以作为一个单独的 package 来使用，以便根据需求进行更多自定义设置。
-    // 使用 publicPath，以确保文件资源能够正确地 serve 在 http://localhost:3000 下
-    publicPath: '/'
+    path: path.resolve(__dirname, 'dist')
   }
 }
 
